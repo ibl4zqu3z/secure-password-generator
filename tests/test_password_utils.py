@@ -1,10 +1,6 @@
-import sys
 import unittest
-from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-
-from password_utils import PasswordConfig, estimate_strength, generate_password
+from password_utils import PasswordConfig, estimate_password_entropy, estimate_strength, generate_password
 
 
 class TestPasswordUtils(unittest.TestCase):
@@ -41,8 +37,14 @@ class TestPasswordUtils(unittest.TestCase):
 
     def test_strength(self):
         self.assertEqual(estimate_strength("abc"), "Débil")
-        self.assertIn(estimate_strength("Abc123456789"), {"Media", "Fuerte"})
-        self.assertIn(estimate_strength("Abc123456789!@#$"), {"Fuerte", "Muy fuerte"})
+        self.assertEqual(estimate_strength("abc1234567"), "Media")
+        self.assertEqual(estimate_strength("Abc123456789"), "Fuerte")
+        self.assertEqual(estimate_strength("Abc123456789!@#$"), "Muy fuerte")
+
+    def test_entropy_is_positive(self):
+        config = PasswordConfig(length=16)
+        entropy = estimate_password_entropy(config)
+        self.assertGreater(entropy, 0)
 
 
 if __name__ == "__main__":
